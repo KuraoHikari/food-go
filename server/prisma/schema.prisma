@@ -39,8 +39,8 @@ model Shop {
   user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   menus     Menu[]    
-  bills Bill[]
-  reviews     Review[]
+  bills     Bill[]
+  reviews   Review[]
    
   @@map("shops")  
 }
