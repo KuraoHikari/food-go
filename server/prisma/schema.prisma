@@ -19,5 +19,98 @@ model User {
   hash     String
   hashedRt String?
 
+  shops Shop[]
+  bills Bill[]
+  reviews     Review[]   
+   
+
   @@map("users")
 }
+
+model Shop {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String  @unique
+  desc      String
+  location  String
+  userId    Int
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  menus     Menu[]    
+  bills Bill[]
+  reviews     Review[]
+   
+  @@map("shops")  
+}
+
+model Menu {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String 
+  desc      String
+  price     Int
+  stok      Int
+  availability Boolean
+  
+  orders     Order[]  
+
+  shopId    Int
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)  
+  @@map("menus")     
+}
+
+model Bill {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  note      String
+  hasReviewed Boolean
+
+  orders     Order[]  
+  
+  userId    Int
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId    Int
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  @@map("bills")  
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menuName  String
+  amount    Int
+  price     Int
+
+  menuId    Int
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade) 
+
+  billId    Int
+  bill Bill @relation(fields: [billId], references: [id])
+  @@map("orders") 
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  desc      String
+  star      Int
+  billId    Int @unique
+
+  userId    Int
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId    Int
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)    
+  @@map("shopReviews") 
+}
+
+
