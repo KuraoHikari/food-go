@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { GetCurrentUserId } from 'src/common/decorators';
+import { GetCurrentUserId } from '../common/decorators';
 import { ShopService } from './shop.service';
 import { Shop } from './types';
 import { CreateShopDto, EditShopDto } from './dto';

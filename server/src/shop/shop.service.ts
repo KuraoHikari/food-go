@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { Shop } from './types';
 import { CreateShopDto, EditShopDto } from './dto';
 import { Prisma } from '@prisma/client';

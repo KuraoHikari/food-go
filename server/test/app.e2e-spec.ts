@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as pactum from 'pactum';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
-import { Tokens } from '../src/auth/types';
 import * as chai from 'chai';
+import { CreateShopDto } from 'src/shop/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -40,6 +40,9 @@ describe('App e2e', () => {
     pactum.handler.addExpectHandler('auth', (ctx) => {
       chai.expect(ctx.res.json).to.have.property(ctx.data);
     });
+    pactum.handler.addExpectHandler('shop', (ctx) => {
+      chai.expect(ctx.res.json).to.have.property(ctx.data);
+    });
 
     describe('Signup', () => {
       it('should throw if email empty', () => {
@@ -62,7 +65,6 @@ describe('App e2e', () => {
           .expect('auth', 'message')
           .expectStatus(400);
       });
-
       it('should throw if no body provided', () => {
         return pactum
           .spec()
@@ -78,6 +80,25 @@ describe('App e2e', () => {
           .expectStatus(201)
           .expect('auth', 'access_token')
           .expect('auth', 'refresh_token');
+      });
+      it('should throw if email isDuplicate', () => {
+        return pactum
+          .spec()
+          .post('/auth/local/signup')
+          .withBody(dto)
+          .expect('auth', 'message')
+          .expectStatus(403);
+      });
+      it('should throw if is not email', () => {
+        return pactum
+          .spec()
+          .post('/auth/local/signup')
+          .withBody({
+            email: 'test',
+            password: 'secret',
+          })
+          .expect('auth', 'message')
+          .expectStatus(400);
       });
     });
     describe('Signin', () => {
@@ -188,6 +209,138 @@ describe('App e2e', () => {
             Authorization: 'Bearer $S{userAt}',
           })
           .expectStatus(200);
+      });
+    });
+  });
+  describe('Shop', () => {
+    const userDto: AuthDto = {
+      email: 'vlad@gmail.com',
+      password: '123',
+    };
+    const userDto2: AuthDto = {
+      email: 'vlad2@gmail.com',
+      password: '123',
+    };
+    it('should signin', () => {
+      return pactum
+        .spec()
+        .post('/auth/local/signin')
+        .withBody(userDto)
+        .expectStatus(200)
+        .expect('auth', 'access_token')
+        .expect('auth', 'refresh_token')
+        .stores('userAt', 'access_token')
+        .stores('userRt', 'refresh_token');
+    });
+    it('should signup', () => {
+      return pactum
+        .spec()
+        .post('/auth/local/signup')
+        .withBody(userDto2)
+        .expectStatus(201)
+        .expect('auth', 'access_token')
+        .expect('auth', 'refresh_token')
+        .stores('userAt2', 'access_token')
+        .stores('userRt2', 'refresh_token');
+    });
+    describe('Get empty shops', () => {
+      it('should get empty shops', () => {
+        return pactum
+          .spec()
+          .get('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(200)
+          .expectBody([]);
+      });
+      it('should throw if no Token', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .expectJson({
+            message: 'Unauthorized',
+            statusCode: 401,
+          })
+          .expectStatus(401);
+      });
+      it('should throw if Invalid Token', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userRt}',
+          })
+          .expectJson({
+            message: 'Unauthorized',
+            statusCode: 401,
+          })
+          .expectStatus(401);
+      });
+    });
+    describe('Create Shop', () => {
+      const shopDto: CreateShopDto = {
+        name: 'kue bali',
+        location: 'di bali',
+        desc: 'ini toko kue',
+      };
+
+      it('should create shop', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(shopDto)
+          .expectStatus(201)
+          .stores('shopId', 'id');
+      });
+      it('should throw if no body provided', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expect('shop', 'message')
+          .expectStatus(400);
+      });
+      it('should throw if shop name isDuplicate', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(shopDto)
+          .expectStatus(403)
+          .expect('shop', 'message');
+      });
+      it('should throw if name empty string', () => {
+        return pactum
+          .spec()
+          .post('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody({
+            name: '',
+            location: 'test',
+            desc: 'test',
+          })
+          .expectStatus(400)
+          .expect('shop', 'message');
+      });
+    });
+    describe('Edit Shop', () => {
+      it('should edit shop', () => {
+        //todo
+      });
+    });
+    describe('Delete Shop', () => {
+      it('should edit shop', () => {
+        //todo
       });
     });
   });
