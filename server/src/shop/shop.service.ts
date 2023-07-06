@@ -25,13 +25,17 @@ export class ShopService {
     return shops;
   }
 
-  getShopById(userId: number, shopId: number): Promise<Shop> {
-    return this.prisma.shop.findFirst({
+  async getShopById(userId: number, shopId: number): Promise<Shop> {
+    const shop = await this.prisma.shop.findUnique({
       where: {
         id: shopId,
-        userId,
       },
     });
+
+    if (!shop || shop.userId !== userId) {
+      throw new ForbiddenException('Access to resources denied');
+    }
+    return shop;
   }
 
   async createShop(userId: number, dto: CreateShopDto): Promise<Shop> {

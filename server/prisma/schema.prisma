@@ -22,6 +22,7 @@ model User {
   shops Shop[]
   bills Bill[]
   reviews     Review[]   
+  menus Menu[]
    
 
   @@map("users")
@@ -60,6 +61,8 @@ model Menu {
 
   shopId    Int
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)  
+  userId    Int
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("menus")     
 }
 

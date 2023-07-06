@@ -8,6 +8,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
 import { ShopService } from './shop/shop.service';
 import { ShopModule } from './shop/shop.module';
+import { MenuController } from './menu/menu.controller';
+import { MenuService } from './menu/menu.service';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -15,6 +18,7 @@ import { ShopModule } from './shop/shop.module';
     AuthModule,
     PrismaModule,
     ShopModule,
+    MenuModule,
   ],
   providers: [
     {
@@ -22,6 +26,8 @@ import { ShopModule } from './shop/shop.module';
       useClass: AtGuard,
     },
     ShopService,
+    MenuService,
   ],
+  controllers: [MenuController],
 })
 export class AppModule {}

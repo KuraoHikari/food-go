@@ -5,7 +5,7 @@ import { AppModule } from './../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthDto } from '../src/auth/dto';
 import * as chai from 'chai';
-import { CreateShopDto } from 'src/shop/dto';
+import { CreateShopDto, EditShopDto } from 'src/shop/dto';
 
 describe('App e2e', () => {
   let app: INestApplication;
@@ -333,14 +333,101 @@ describe('App e2e', () => {
           .expect('shop', 'message');
       });
     });
+    describe('Get shop', () => {
+      it('should get shop', () => {
+        return pactum
+          .spec()
+          .get('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(200)
+          .expectJsonLength(1);
+      });
+    });
+    describe('Get shop by id', () => {
+      it('should get shop by id', () => {
+        return pactum
+          .spec()
+          .get('/shop/{id}')
+          .withPathParams('id', '$S{shopId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(200)
+          .expectBodyContains('$S{shopId}');
+      });
+      it('should throw if shop was not exit', () => {
+        return pactum
+          .spec()
+          .get('/shop/{id}')
+          .withPathParams('id', '$S{shopId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt2}',
+          })
+          .expectStatus(403);
+      });
+    });
     describe('Edit Shop', () => {
+      const shopDto: EditShopDto = {
+        name: 'kue bali',
+        location: 'di kuta',
+        desc: 'ini toko kue kuta',
+      };
       it('should edit shop', () => {
-        //todo
+        return pactum
+          .spec()
+          .patch('/shop/{id}')
+          .withPathParams('id', '$S{shopId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(shopDto)
+          .expectStatus(200)
+          .expectBodyContains(shopDto.name)
+          .expectBodyContains(shopDto.desc);
+      });
+      it('should throw if shop was not exit', () => {
+        return pactum
+          .spec()
+          .patch('/shop/2')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(shopDto)
+          .expectStatus(403);
       });
     });
     describe('Delete Shop', () => {
-      it('should edit shop', () => {
-        //todo
+      it('should delete shop', () => {
+        return pactum
+          .spec()
+          .delete('/shop/{id}')
+          .withPathParams('id', '$S{shopId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(204);
+      });
+      it('should throw if shop was not exit', () => {
+        return pactum
+          .spec()
+          .delete('/shop/{id}')
+          .withPathParams('id', '$S{shopId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(403);
+      });
+      it('should get empty shops', () => {
+        return pactum
+          .spec()
+          .get('/shop')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(200)
+          .expectJsonLength(0);
       });
     });
   });
