@@ -15,7 +15,7 @@ export class CreateMenuDto {
 
   @IsNumber()
   @IsNotEmpty()
-  stok: number;
+  stock: number;
 
   @IsBoolean()
   @IsNotEmpty()

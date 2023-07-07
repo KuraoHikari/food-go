@@ -26,10 +26,9 @@ export class MenuController {
     return this.menuService.getMenus(userId, shopId);
   }
 
-  @Get(':menuId')
+  @Get(':menuId/info')
   getMenuById(
     @GetCurrentUserId() userId: number,
-
     @Param('menuId', ParseIntPipe) menuId: number,
   ): Promise<Menu> {
     return this.menuService.getMenuById(userId, menuId);
@@ -57,7 +56,7 @@ export class MenuController {
   @Delete(':menuId')
   deleteMenu(
     @GetCurrentUserId() userId: number,
-    @Param('id', ParseIntPipe) menuId: number,
+    @Param('menuId', ParseIntPipe) menuId: number,
   ): Promise<boolean> {
     return this.menuService.deleteMenu(userId, menuId);
   }

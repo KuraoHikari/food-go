@@ -5,7 +5,7 @@ export type Menu = {
   name: string;
   desc: string;
   price: number;
-  stok: number;
+  stock: number;
   availability: boolean;
   shopId: number;
 };

@@ -15,7 +15,7 @@ export class EditMenuDto {
 
   @IsNumber()
   @IsOptional()
-  stok?: number;
+  stock?: number;
 
   @IsBoolean()
   @IsOptional()

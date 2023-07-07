@@ -54,7 +54,7 @@ model Menu {
   name      String 
   desc      String
   price     Int
-  stok      Int
+  stock      Int
   availability Boolean
   
   orders     Order[]  
