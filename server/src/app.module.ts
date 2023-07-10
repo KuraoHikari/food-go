@@ -11,6 +11,7 @@ import { ShopModule } from './shop/shop.module';
 import { MenuController } from './menu/menu.controller';
 import { MenuService } from './menu/menu.service';
 import { MenuModule } from './menu/menu.module';
+import { BillModule } from './bill/bill.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MenuModule } from './menu/menu.module';
     PrismaModule,
     ShopModule,
     MenuModule,
+    BillModule,
   ],
   providers: [
     {
