@@ -2,18 +2,40 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { GetCurrentUserId } from '../common/decorators';
 import { CreateMenuDto, EditMenuDto } from './dto';
 import { Menu } from './types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterError, diskStorage } from 'multer';
+import path = require('path');
+import { v4 as uuidv4 } from 'uuid';
+
+export const storage = {
+  storage: diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      const filename: string =
+        path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 
 @Controller('menu')
 export class MenuController {
@@ -35,12 +57,34 @@ export class MenuController {
   }
 
   @Post(':shopId')
-  createMenu(
+  @UseInterceptors(FileInterceptor('file', storage))
+  async createMenu(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
     @GetCurrentUserId() userId: number,
     @Param('shopId', ParseIntPipe) shopId: number,
     @Body() dto: CreateMenuDto,
-  ): Promise<Menu> {
-    return this.menuService.createMenu(userId, shopId, dto);
+  ) {
+    //save data into db
+    //save file into storage
+    // console.log(file);
+    return this.menuService.createMenu(userId, shopId, dto, file);
+  }
+
+  @Post('/imageUpload')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadMenuImage() {
+    //save data into db
+    //save file into storage
+    // console.log(file);
+    return true;
   }
 
   @Patch(':menuId')

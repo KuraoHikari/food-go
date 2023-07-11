@@ -3,6 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuDto, EditMenuDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { Menu } from './types';
+import * as fs from 'fs';
+
+import path = require('path');
+import { v4 as uuidv4 } from 'uuid';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { storage } from './menu.controller';
+import axios from 'axios';
+import { diskStorage } from 'multer';
 
 @Injectable()
 export class MenuService {
@@ -35,13 +43,18 @@ export class MenuService {
     userId: number,
     shopId: number,
     dto: CreateMenuDto,
+    file: any,
   ): Promise<Menu> {
     const menu = await this.prisma.menu
       .create({
         data: {
           userId,
           shopId,
-          ...dto,
+          price: Number(dto.price),
+          stock: Number(dto.stock),
+          availability: Boolean(dto.availability),
+          name: dto.name,
+          desc: dto.desc,
         },
       })
       .catch((error) => {
