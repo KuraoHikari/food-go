@@ -1,29 +1,38 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateBillDto } from './dto/createBill.dto';
+import { Bill } from './types';
 
 @Injectable()
 export class BillService {
   constructor(private prisma: PrismaService) {}
-  async createBill(userId: number) {
+  getBills(userId: number): Promise<Bill[]> {
+    return this.prisma.bill.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        orders: true,
+      },
+    });
+  }
+  async createBill(userId: number, dto: CreateBillDto): Promise<Bill> {
     return await this.prisma.$transaction(async (tx) => {
-      const dto = {
-        shopId: 7,
-        note: '',
-        orderMenu: [
-          {
-            menuId: 3,
-            menuName: 'nas gor 3',
-            amount: 2,
-          },
-          {
-            menuId: 1,
-            menuName: 'nas gor',
-            amount: 4,
-          },
-        ],
-      };
+      const shop = await tx.shop.findUnique({
+        where: {
+          id: dto.shopId,
+        },
+      });
 
-      const bill = await this.prisma.bill.create({
+      if (!shop) {
+        throw new BadRequestException('Shop not found');
+      }
+
+      const bill = await tx.bill.create({
         data: {
           hasReviewed: false,
           note: dto.note,
@@ -35,7 +44,7 @@ export class BillService {
       const orders = [];
 
       for await (const menu of dto.orderMenu) {
-        const findMenu = await this.prisma.menu.findUnique({
+        const findMenu = await tx.menu.findUnique({
           where: {
             id: menu.menuId,
           },
@@ -58,7 +67,7 @@ export class BillService {
         });
       }
 
-      const createOrders = await this.prisma.order.createMany({
+      const createOrders = await tx.order.createMany({
         data: orders,
         skipDuplicates: true,
       });
@@ -72,5 +81,25 @@ export class BillService {
         orders,
       };
     });
+  }
+
+  async deleteBill(userId: number, billId: number): Promise<Boolean> {
+    const bill = await this.prisma.bill.findUnique({
+      where: {
+        id: billId,
+      },
+    });
+
+    if (!bill || bill.userId !== userId) {
+      throw new ForbiddenException('Access to resources denied');
+    }
+
+    await this.prisma.bill.delete({
+      where: {
+        id: billId,
+      },
+    });
+
+    return true;
   }
 }
