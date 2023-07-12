@@ -1,20 +1,22 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuDto, EditMenuDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { Menu } from './types';
 import * as fs from 'fs';
-
-import path = require('path');
-import { v4 as uuidv4 } from 'uuid';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from './menu.controller';
-import axios from 'axios';
-import { diskStorage } from 'multer';
+import { UtilsService } from '../utils/utils.service';
 
 @Injectable()
 export class MenuService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private utilsService: UtilsService,
+  ) {}
   async getMenus(userId: number, shopId: number): Promise<Menu[]> {
     const menus = await this.prisma.menu.findMany({
       where: {
@@ -43,13 +45,16 @@ export class MenuService {
     userId: number,
     shopId: number,
     dto: CreateMenuDto,
-    file: any,
+    file: Express.Multer.File,
   ): Promise<Menu> {
+    const updatedFileName = this.utilsService.generateUpdatedFileName(file);
+
     const menu = await this.prisma.menu
       .create({
         data: {
           userId,
           shopId,
+          image: updatedFileName,
           price: Number(dto.price),
           stock: Number(dto.stock),
           availability: Boolean(dto.availability),
@@ -64,6 +69,14 @@ export class MenuService {
           }
         }
         throw error;
+      });
+
+    this.utilsService
+      .writeFileToUploadsFolder(updatedFileName, file.buffer, 'menu')
+      .catch(() => {
+        throw new InternalServerErrorException(
+          'Error saving file to uploads folder',
+        );
       });
 
     return menu;

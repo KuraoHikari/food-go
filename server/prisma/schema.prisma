@@ -15,9 +15,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email    String  @unique
-  hash     String
-  hashedRt String?
+  email       String  @unique
+  hash        String
+  hashedRt    String?
+  firstName   String?
+  lastName    String?
+  phoneNumber String?
+  profileImage String @default("default.jpg")
+  profileBanner String @default("default.jpg")
 
   shops Shop[]
   bills Bill[]
@@ -37,7 +42,10 @@ model Shop {
   desc      String
   location  String
   userId    Int
+  phoneNumber String?
   user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  banner    String
+  logo      String
   
   menus     Menu[]    
   bills     Bill[]
@@ -56,7 +64,7 @@ model Menu {
   price     Int
   stock     Int
   availability Boolean
-
+  image     String
   
   orders     Order[]  
 

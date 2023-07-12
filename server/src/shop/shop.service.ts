@@ -42,6 +42,8 @@ export class ShopService {
     const shop = await this.prisma.shop
       .create({
         data: {
+          banner: 'default.jpg',
+          logo: '',
           userId,
           ...dto,
         },

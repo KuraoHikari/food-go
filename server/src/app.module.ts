@@ -13,6 +13,8 @@ import { MenuService } from './menu/menu.service';
 import { MenuModule } from './menu/menu.module';
 import { BillModule } from './bill/bill.module';
 import { ReviewModule } from './review/review.module';
+import { UtilsService } from './utils/utils.service';
+import { UtilsModule } from './utils/utils.module';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { ReviewModule } from './review/review.module';
     MenuModule,
     BillModule,
     ReviewModule,
+    UtilsModule,
   ],
   providers: [
     {
@@ -31,6 +34,7 @@ import { ReviewModule } from './review/review.module';
     },
     ShopService,
     MenuService,
+    UtilsService,
   ],
   controllers: [MenuController],
 })
