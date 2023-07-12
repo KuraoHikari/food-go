@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -73,6 +74,15 @@ export class MenuController {
     @Body() dto: CreateMenuDto,
   ) {
     return this.menuService.createMenu(userId, shopId, dto, image);
+  }
+
+  @Put('/availability/:menuId')
+  editMenuImage(
+    @GetCurrentUserId() userId: number,
+    @Param('menuId', ParseIntPipe) menuId: number,
+    @Body() dto: EditMenuDto,
+  ) {
+    //todo
   }
 
   @Patch(':menuId')

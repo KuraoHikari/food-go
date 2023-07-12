@@ -26,7 +26,7 @@ model User {
 
   shops Shop[]
   bills Bill[]
-  reviews     Review[]   
+  reviews Review[]   
   menus Menu[]
    
 
@@ -44,8 +44,8 @@ model Shop {
   userId    Int
   phoneNumber String?
   user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  banner    String
-  logo      String
+  banner    String @default("default.jpg")
+  logo      String  @default("default.png")
   
   menus     Menu[]    
   bills     Bill[]
@@ -64,7 +64,7 @@ model Menu {
   price     Int
   stock     Int
   availability Boolean
-  image     String
+  image     String @default("default.png")
   
   orders     Order[]  
 

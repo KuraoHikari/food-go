@@ -21,3 +21,9 @@ export class EditMenuDto {
   @IsOptional()
   availability?: boolean;
 }
+
+export class EditMenuAvailabilityDto {
+  @IsBoolean()
+  @IsOptional()
+  availability?: boolean;
+}
