@@ -16,10 +16,12 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { GetCurrentUserId, Public } from '../common/decorators';
-import { CreateMenuDto, EditMenuDto } from './dto';
+import { CreateMenuDto, EditMenuAvailabilityDto, EditMenuDto } from './dto';
 import { Menu } from './types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
@@ -58,6 +60,11 @@ export class MenuController {
 
   @Post(':shopId')
   @UseInterceptors(FileInterceptor('image'))
+  @UsePipes(
+    new ValidationPipe({
+      always: true,
+    }),
+  )
   async createMenu(
     @UploadedFile(
       new ParseFilePipe({
@@ -76,22 +83,62 @@ export class MenuController {
     return this.menuService.createMenu(userId, shopId, dto, image);
   }
 
-  @Put('/availability/:menuId')
-  editMenuImage(
-    @GetCurrentUserId() userId: number,
-    @Param('menuId', ParseIntPipe) menuId: number,
-    @Body() dto: EditMenuDto,
-  ) {
-    //todo
-  }
-
   @Patch(':menuId')
+  @UseInterceptors(FileInterceptor('image'))
+  @UsePipes(
+    new ValidationPipe({
+      always: true,
+    }),
+  )
   editMenu(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
     @GetCurrentUserId() userId: number,
     @Param('menuId', ParseIntPipe) menuId: number,
     @Body() dto: EditMenuDto,
   ): Promise<Menu> {
-    return this.menuService.editMenu(userId, menuId, dto);
+    return this.menuService.editMenu(userId, menuId, dto, image);
+  }
+
+  @Patch('edit-image/:menuId')
+  @UseInterceptors(FileInterceptor('image'))
+  @UsePipes(
+    new ValidationPipe({
+      always: true,
+    }),
+  )
+  editMenuImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+        fileIsRequired: true,
+      }),
+    )
+    image: Express.Multer.File,
+    @GetCurrentUserId() userId: number,
+    @Param('menuId', ParseIntPipe) menuId: number,
+  ): Promise<Menu> {
+    return this.menuService.editMenu(userId, menuId, {}, image);
+  }
+
+  @Put('availability/:menuId')
+  editMenuAvailability(
+    @GetCurrentUserId() userId: number,
+    @Param('menuId', ParseIntPipe) menuId: number,
+    @Body() dto: EditMenuAvailabilityDto,
+  ): Promise<Menu> {
+    return this.menuService.editMenu(userId, menuId, dto, undefined);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

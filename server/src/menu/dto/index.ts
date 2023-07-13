@@ -1,2 +1,2 @@
-export * from './createShop.dto';
-export * from './editShop.dto';
+export * from './createMenu.dto';
+export * from './editMenu.dto';

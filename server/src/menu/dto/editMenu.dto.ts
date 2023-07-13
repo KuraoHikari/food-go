@@ -1,3 +1,4 @@
+import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class EditMenuDto {
@@ -11,14 +12,21 @@ export class EditMenuDto {
 
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   price?: number;
 
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   stock?: number;
 
   @IsBoolean()
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
   availability?: boolean;
 }
 

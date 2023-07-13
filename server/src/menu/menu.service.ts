@@ -55,11 +55,7 @@ export class MenuService {
           userId,
           shopId,
           image: updatedFileName,
-          price: Number(dto.price),
-          stock: Number(dto.stock),
-          availability: Boolean(dto.availability),
-          name: dto.name,
-          desc: dto.desc,
+          ...dto,
         },
       })
       .catch((error) => {
@@ -86,6 +82,7 @@ export class MenuService {
     userId: number,
     menuId: number,
     dto: EditMenuDto,
+    file: Express.Multer.File,
   ): Promise<Menu> {
     const menu = await this.prisma.menu.findUnique({
       where: {
@@ -97,14 +94,36 @@ export class MenuService {
       throw new ForbiddenException('Access to resources denied');
     }
 
+    const payload: EditMenuDto & { image: string } = {
+      ...dto,
+      image: menu.image,
+    };
+
+    let updatedFileName: string = '';
+
+    if (file) {
+      updatedFileName = this.utilsService.generateUpdatedFileName(file);
+      payload.image = updatedFileName;
+    }
+
     const updateMenu = this.prisma.menu.update({
       where: {
         id: menuId,
       },
       data: {
-        ...dto,
+        ...payload,
       },
     });
+
+    if (file) {
+      this.utilsService
+        .writeFileToUploadsFolder(updatedFileName, file.buffer, 'menu')
+        .catch(() => {
+          throw new InternalServerErrorException(
+            'Error saving file to uploads folder',
+          );
+        });
+    }
 
     return updateMenu;
   }
