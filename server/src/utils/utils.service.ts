@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as mime from 'mime-types';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Observable, of } from 'rxjs';
+import { Response } from 'express';
 
 @Injectable()
 export class UtilsService {
@@ -35,5 +37,17 @@ export class UtilsService {
         reject(error);
       });
     });
+  }
+
+  findImage(
+    imagename: string,
+    folder: string,
+    res: Response,
+  ): Observable<void> {
+    return of(
+      res.sendFile(
+        path.join(process.cwd(), `./uploads/${folder}/${imagename}`),
+      ),
+    );
   }
 }

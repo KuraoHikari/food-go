@@ -2,13 +2,10 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
-  MaxFileSizeValidator,
   Param,
-  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -24,22 +21,25 @@ import { GetCurrentUserId, Public } from '../common/decorators';
 import { CreateMenuDto, EditMenuAvailabilityDto, EditMenuDto } from './dto';
 import { Menu } from './types';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as path from 'path';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Response } from 'express';
+import { CustomParseFilePipe } from '../lib/parse-file.pipe';
+import { UtilsService } from '../utils/utils.service';
 
 @Controller('menu')
 export class MenuController {
-  constructor(private menuService: MenuService) {}
+  constructor(
+    private menuService: MenuService,
+    private utilsService: UtilsService,
+  ) {}
+
   @Public()
   @Get('menu-image/:imagename')
   findProfileImage(
     @Param('imagename') imagename: string,
     @Res() res: Response,
   ): Observable<void> {
-    return of(
-      res.sendFile(path.join(process.cwd(), 'uploads/menu/' + imagename)),
-    );
+    return this.utilsService.findImage(imagename, 'menu', res);
   }
 
   @Get(':shopId')
@@ -60,22 +60,9 @@ export class MenuController {
 
   @Post(':shopId')
   @UseInterceptors(FileInterceptor('image'))
-  @UsePipes(
-    new ValidationPipe({
-      always: true,
-    }),
-  )
+  @UsePipes(new ValidationPipe({ always: true }))
   async createMenu(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
-        ],
-        fileIsRequired: true,
-      }),
-    )
-    image: Express.Multer.File,
+    @UploadedFile(new CustomParseFilePipe(true)) image: Express.Multer.File,
     @GetCurrentUserId() userId: number,
     @Param('shopId', ParseIntPipe) shopId: number,
     @Body() dto: CreateMenuDto,
@@ -85,22 +72,9 @@ export class MenuController {
 
   @Patch(':menuId')
   @UseInterceptors(FileInterceptor('image'))
-  @UsePipes(
-    new ValidationPipe({
-      always: true,
-    }),
-  )
+  @UsePipes(new ValidationPipe({ always: true }))
   editMenu(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
-    image: Express.Multer.File,
+    @UploadedFile(new CustomParseFilePipe(false)) image: Express.Multer.File,
     @GetCurrentUserId() userId: number,
     @Param('menuId', ParseIntPipe) menuId: number,
     @Body() dto: EditMenuDto,
@@ -110,22 +84,9 @@ export class MenuController {
 
   @Patch('edit-image/:menuId')
   @UseInterceptors(FileInterceptor('image'))
-  @UsePipes(
-    new ValidationPipe({
-      always: true,
-    }),
-  )
+  @UsePipes(new ValidationPipe({ always: true }))
   editMenuImage(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
-        ],
-        fileIsRequired: true,
-      }),
-    )
-    image: Express.Multer.File,
+    @UploadedFile(new CustomParseFilePipe(true)) image: Express.Multer.File,
     @GetCurrentUserId() userId: number,
     @Param('menuId', ParseIntPipe) menuId: number,
   ): Promise<Menu> {
