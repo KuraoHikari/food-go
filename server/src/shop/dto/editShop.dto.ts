@@ -1,4 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsMobilePhone,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class EditShopDto {
   @IsString()
@@ -13,4 +18,9 @@ export class EditShopDto {
   @IsString()
   @IsOptional()
   location?: string;
+
+  @IsMobilePhone('id-ID')
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber?: string;
 }

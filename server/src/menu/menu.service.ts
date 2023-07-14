@@ -8,7 +8,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuDto, EditMenuDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { Menu } from './types';
-import * as fs from 'fs';
 import { UtilsService } from '../utils/utils.service';
 
 @Injectable()

@@ -15,6 +15,7 @@ import { BillModule } from './bill/bill.module';
 import { ReviewModule } from './review/review.module';
 import { UtilsService } from './utils/utils.service';
 import { UtilsModule } from './utils/utils.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UtilsModule } from './utils/utils.module';
     BillModule,
     ReviewModule,
     UtilsModule,
+    UserModule,
   ],
   providers: [
     {

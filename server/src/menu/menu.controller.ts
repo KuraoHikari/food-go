@@ -35,7 +35,7 @@ export class MenuController {
 
   @Public()
   @Get('menu-image/:imagename')
-  findProfileImage(
+  findMenuImage(
     @Param('imagename') imagename: string,
     @Res() res: Response,
   ): Observable<void> {
