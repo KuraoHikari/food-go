@@ -8,6 +8,9 @@ import { CreateMenuDto, EditMenuDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { Menu } from './types';
 import { UtilsService } from '../utils/utils.service';
+import { PaginateFunction, PaginatedResult, paginator } from '../lib/paginator';
+
+const paginate: PaginateFunction = paginator({ perPage: 10 });
 
 @Injectable()
 export class MenuService {
@@ -17,6 +20,8 @@ export class MenuService {
   ) {}
   async getMenus(userId: number, shopId: number): Promise<Menu[]> {
     const menus = await this.prisma.menu.findMany({
+      skip: 4,
+      take: 2,
       where: {
         userId,
         shopId,
@@ -144,5 +149,26 @@ export class MenuService {
     });
 
     return true;
+  }
+
+  async findMany({
+    where,
+    orderBy,
+    page,
+  }: {
+    where?: Prisma.MenuWhereInput;
+    orderBy?: Prisma.MenuOrderByWithRelationInput;
+    page?: number;
+  }): Promise<PaginatedResult<Menu>> {
+    return paginate(
+      this.prisma.menu,
+      {
+        where,
+        orderBy,
+      },
+      {
+        page,
+      },
+    );
   }
 }

@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBillDto } from './dto/createBill.dto';
 import { Bill } from './types';
+import { Shop } from 'src/shop/types';
 
 @Injectable()
 export class BillService {
@@ -17,9 +18,11 @@ export class BillService {
       },
       include: {
         orders: true,
+        shop: true,
       },
     });
   }
+
   async createBill(userId: number, dto: CreateBillDto): Promise<Bill> {
     return await this.prisma.$transaction(async (tx) => {
       const shop = await tx.shop.findUnique({

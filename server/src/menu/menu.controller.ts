@@ -42,6 +42,17 @@ export class MenuController {
     return this.utilsService.findImage(imagename, 'menu', res);
   }
 
+  @Public()
+  @Get()
+  getPublicMenus() {
+    return this.menuService.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      page: 0,
+    });
+  }
+
   @Get(':shopId')
   getMenus(
     @GetCurrentUserId() userId: number,
