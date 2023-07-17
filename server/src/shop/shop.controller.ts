@@ -33,7 +33,7 @@ export class ShopController {
     private utilsService: UtilsService,
   ) {}
   @Public()
-  @Get('shop-banner/:imagename')
+  @Get('pub/shop-banner/:imagename')
   findShopBannerImage(
     @Param('imagename') imagename: string,
     @Res() res: Response,
@@ -42,7 +42,7 @@ export class ShopController {
   }
 
   @Public()
-  @Get('shop-logo/:imagename')
+  @Get('pub/shop-logo/:imagename')
   findShopLogoImage(
     @Param('imagename') imagename: string,
     @Res() res: Response,

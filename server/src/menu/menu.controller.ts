@@ -34,7 +34,7 @@ export class MenuController {
   ) {}
 
   @Public()
-  @Get('menu-image/:imagename')
+  @Get('pub/menu-image/:imagename')
   findMenuImage(
     @Param('imagename') imagename: string,
     @Res() res: Response,
@@ -43,7 +43,7 @@ export class MenuController {
   }
 
   @Public()
-  @Get()
+  @Get('pub')
   getPublicMenus() {
     return this.menuService.findMany({
       orderBy: {
