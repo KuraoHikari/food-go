@@ -8,6 +8,11 @@ import { CreateBillDto } from './dto/createBill.dto';
 import { Bill } from './types';
 import { Shop } from 'src/shop/types';
 
+import { PaginateFunction, PaginatedResult, paginator } from '../lib/paginator';
+import { Prisma } from '@prisma/client';
+
+const paginate: PaginateFunction = paginator({ perPage: 10 });
+
 @Injectable()
 export class BillService {
   constructor(private prisma: PrismaService) {}
@@ -104,5 +109,26 @@ export class BillService {
     });
 
     return true;
+  }
+
+  async findMany({
+    where,
+    orderBy,
+    page,
+  }: {
+    where?: Prisma.BillWhereInput;
+    orderBy?: Prisma.BillOrderByWithRelationInput;
+    page?: number;
+  }): Promise<PaginatedResult<Bill>> {
+    return paginate(
+      this.prisma.bill,
+      {
+        where,
+        orderBy,
+      },
+      {
+        page,
+      },
+    );
   }
 }

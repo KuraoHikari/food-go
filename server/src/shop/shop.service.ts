@@ -8,6 +8,9 @@ import { Shop } from './types';
 import { CreateShopDto, EditShopDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { UtilsService } from 'src/utils/utils.service';
+import { PaginateFunction, PaginatedResult, paginator } from '../lib/paginator';
+
+const paginate: PaginateFunction = paginator({ perPage: 10 });
 
 @Injectable()
 export class ShopService {
@@ -184,5 +187,26 @@ export class ShopService {
     });
 
     return true;
+  }
+
+  async findMany({
+    where,
+    orderBy,
+    page,
+  }: {
+    where?: Prisma.ShopWhereInput;
+    orderBy?: Prisma.ShopOrderByWithRelationInput;
+    page?: number;
+  }): Promise<PaginatedResult<Shop>> {
+    return paginate(
+      this.prisma.shop,
+      {
+        where,
+        orderBy,
+      },
+      {
+        page,
+      },
+    );
   }
 }
