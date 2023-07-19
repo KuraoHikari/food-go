@@ -6,7 +6,6 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBillDto } from './dto/createBill.dto';
 import { Bill } from './types';
-import { Shop } from 'src/shop/types';
 
 import { PaginateFunction, PaginatedResult, paginator } from '../lib/paginator';
 import { Prisma } from '@prisma/client';

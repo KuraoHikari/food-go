@@ -10,7 +10,43 @@ import {
   Typography,
 } from "@material-tailwind/react";
 
+import { useForm } from "react-hook-form";
+import { useCallback, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 export function SignUp() {
+  const { register, handleSubmit } = useForm();
+  const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isErrorRegister, setisErrorRegister] = useState(false);
+  const handleRegister = useCallback(
+    async (payload) => {
+      try {
+        setIsLoading(true);
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_BASE_API_URL}/auth/local/signup`,
+          {
+            email: payload.email,
+            password: payload.password,
+          }
+        );
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+
+        navigate("/dashboard/home");
+
+        console.log("🚀 ~ file: sign-up.jsx:33 ~ data:", data);
+      } catch (error) {
+        setisErrorRegister(true);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [handleSubmit]
+  );
+
   return (
     <>
       <img
@@ -29,34 +65,67 @@ export function SignUp() {
               Register
             </Typography>
           </CardHeader>
-          <CardBody>
-            <form className="flex flex-col gap-4">
-              <Input label="Name" size="lg" />
-              <Input type="email" label="Email" size="lg" />
-              <Input type="password" label="Password" size="lg" />
+          <form onSubmit={handleSubmit((d) => handleRegister(d))}>
+            <CardBody className="flex flex-col gap-4">
+              <Input
+                type="email"
+                label="Email"
+                size="lg"
+                {...register("email", { required: true })}
+              />
+              <Input
+                type="password"
+                label="Password"
+                size="lg"
+                {...register("password", { required: true })}
+              />
               <div className="-ml-2.5">
                 <Checkbox label="I agree the Terms and Conditions" />
               </div>
-            </form>
-          </CardBody>
-          <CardFooter className="pt-0">
-            <Button variant="gradient" fullWidth>
-              Register
-            </Button>
-            <Typography variant="small" className="mt-6 flex justify-center">
-              Already have an account?
-              <Link to="/auth/sign-in">
+            </CardBody>
+            <CardFooter className="pt-0">
+              <Button
+                type="submit"
+                variant="gradient"
+                fullWidth
+                disabled={isLoading}
+              >
+                Register
+              </Button>
+              {isErrorRegister && (
                 <Typography
-                  as="span"
                   variant="small"
-                  color="green"
-                  className="ml-1 font-bold"
+                  className="mt-6 flex justify-center text-red-500"
                 >
-                  Log In
+                  some thing went wrong
                 </Typography>
-              </Link>
-            </Typography>
-          </CardFooter>
+              )}
+              <Typography variant="small" className="mt-6 flex justify-center">
+                Already have an account?
+                {!isLoading ? (
+                  <Link to="/auth/sign-in">
+                    <Typography
+                      as="span"
+                      variant="small"
+                      color="green"
+                      className="ml-1 font-bold"
+                    >
+                      Log In
+                    </Typography>
+                  </Link>
+                ) : (
+                  <Typography
+                    as="span"
+                    variant="small"
+                    color="green"
+                    className="ml-1 font-bold"
+                  >
+                    Log In
+                  </Typography>
+                )}
+              </Typography>
+            </CardFooter>
+          </form>
         </Card>
       </div>
     </>

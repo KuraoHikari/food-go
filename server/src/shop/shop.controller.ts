@@ -24,7 +24,7 @@ import { Observable } from 'rxjs';
 import { UtilsService } from '../utils/utils.service';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CustomParseFilePipe } from 'src/lib/parse-file.pipe';
+import { CustomParseFilePipe } from '../lib/parse-file.pipe';
 
 @Controller('shop')
 export class ShopController {

@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Shop } from './types';
 import { CreateShopDto, EditShopDto } from './dto';
 import { Prisma } from '@prisma/client';
-import { UtilsService } from 'src/utils/utils.service';
+import { UtilsService } from '../utils/utils.service';
 import { PaginateFunction, PaginatedResult, paginator } from '../lib/paginator';
 
 const paginate: PaginateFunction = paginator({ perPage: 10 });
