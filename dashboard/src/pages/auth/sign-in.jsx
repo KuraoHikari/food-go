@@ -36,14 +36,13 @@ export function SignIn() {
         localStorage.setItem("refresh_token", data.refresh_token);
 
         navigate("/dashboard/home");
-        console.log("🚀 ~ file: sign-in.jsx:33 ~ data:", data);
       } catch (error) {
         setisErrorLogin(true);
       } finally {
         setIsLoading(false);
       }
     },
-    [handleSubmit]
+    [handleSubmit, isLoading, isErrorLogin]
   );
   return (
     <>

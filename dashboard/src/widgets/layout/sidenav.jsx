@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Avatar,
@@ -7,9 +7,17 @@ import {
   IconButton,
   Typography,
 } from "@material-tailwind/react";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
+import { useState } from "react";
+import axios from "axios";
 
 export function Sidenav({ brandImg, brandName, routes }) {
+  const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isErrorLogin, setisErrorLogin] = useState(false);
+
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
   const sidenavTypes = {
@@ -17,6 +25,33 @@ export function Sidenav({ brandImg, brandName, routes }) {
     white: "bg-white shadow-lg",
     transparent: "bg-transparent",
   };
+
+  const handleLogout = useCallback(
+    async (payload) => {
+      try {
+        setIsLoading(true);
+        await axios.post(
+          `${import.meta.env.VITE_BASE_API_URL}/auth/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
+
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
+        navigate("/dashboard/home");
+      } catch (error) {
+        setisErrorLogin(true);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [handleSubmit, isLoading, isErrorLogin]
+  );
 
   return (
     <aside
@@ -91,6 +126,19 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 </NavLink>
               </li>
             ))}
+            <li>
+              <Button
+                variant={"text"}
+                color={sidenavType === "dark" ? "white" : "blue-gray"}
+                className="flex items-center gap-4 px-4 capitalize"
+                fullWidth
+              >
+                <ArrowLeftIcon className="h-5 w-5 text-inherit" />
+                <Typography color="inherit" className="font-medium capitalize">
+                  Logout
+                </Typography>
+              </Button>
+            </li>
           </ul>
         ))}
       </div>

@@ -36,15 +36,13 @@ export function SignUp() {
         localStorage.setItem("refresh_token", data.refresh_token);
 
         navigate("/dashboard/home");
-
-        console.log("🚀 ~ file: sign-up.jsx:33 ~ data:", data);
       } catch (error) {
         setisErrorRegister(true);
       } finally {
         setIsLoading(false);
       }
     },
-    [handleSubmit]
+    [handleSubmit, isLoading, isErrorLogin]
   );
 
   return (
