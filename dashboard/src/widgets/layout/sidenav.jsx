@@ -11,6 +11,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 import { useCallback, useState } from "react";
 import axios from "axios";
+import { logoutUser, refreshAccessToken } from "@/api/auth";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const navigate = useNavigate();
@@ -27,24 +28,39 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   const handleLogout = useCallback(async () => {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      await axios.post(
-        `${import.meta.env.VITE_BASE_API_URL}/auth/logout`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        }
-      );
+      const accessToken = localStorage.getItem("access_token");
+
+      await logoutUser(accessToken);
 
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
 
       navigate("/auth/sign-in");
     } catch (error) {
-      setisErrorLogout(true);
+      if (error.response.data.message === "Unauthorized") {
+        try {
+          const refreshToken = localStorage.getItem("refresh_token");
+          const newAccessToken = await refreshAccessToken(refreshToken);
+
+          await logoutUser(newAccessToken);
+
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+
+          navigate("/auth/sign-in");
+        } catch (error) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+
+          navigate("/auth/sign-in");
+        }
+      } else {
+        setisErrorLogout(true);
+        console.log("🚀 ~ handleLogout ~ error:", error);
+      }
     } finally {
       setIsLoading(false);
     }
