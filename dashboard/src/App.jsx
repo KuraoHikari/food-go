@@ -5,23 +5,9 @@ import { ProtectedAuthRoute, ProtectedRoute } from "./protectedRoute";
 function App() {
   return (
     <Routes>
-      <Route
-        path="/dashboard/*"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/dashboard/*" element={<Dashboard />} />
 
-      <Route
-        path="/auth/*"
-        element={
-          <ProtectedAuthRoute>
-            <Auth />
-          </ProtectedAuthRoute>
-        }
-      />
+      <Route path="/auth/*" element={<Auth />} />
       <Route path="*" element={<Navigate to="/dashboard/home" replace />} />
     </Routes>
   );

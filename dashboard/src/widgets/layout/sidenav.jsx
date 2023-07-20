@@ -9,14 +9,14 @@ import {
 } from "@material-tailwind/react";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import axios from "axios";
 
 export function Sidenav({ brandImg, brandName, routes }) {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isErrorLogin, setisErrorLogin] = useState(false);
+  const [isErrorLogout, setisErrorLogout] = useState(false);
 
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
@@ -26,32 +26,29 @@ export function Sidenav({ brandImg, brandName, routes }) {
     transparent: "bg-transparent",
   };
 
-  const handleLogout = useCallback(
-    async (payload) => {
-      try {
-        setIsLoading(true);
-        await axios.post(
-          `${import.meta.env.VITE_BASE_API_URL}/auth/logout`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-            },
-          }
-        );
+  const handleLogout = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      await axios.post(
+        `${import.meta.env.VITE_BASE_API_URL}/auth/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
 
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
 
-        navigate("/dashboard/home");
-      } catch (error) {
-        setisErrorLogin(true);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [handleSubmit, isLoading, isErrorLogin]
-  );
+      navigate("/auth/sign-in");
+    } catch (error) {
+      setisErrorLogout(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, isErrorLogout]);
 
   return (
     <aside
@@ -85,62 +82,68 @@ export function Sidenav({ brandImg, brandName, routes }) {
         </IconButton>
       </div>
       <div className="m-4">
-        {routes.map(({ layout, title, pages }, key) => (
-          <ul key={key} className="mb-4 flex flex-col gap-1">
-            {title && (
-              <li className="mx-3.5 mt-4 mb-2">
-                <Typography
-                  variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
-                  className="font-black uppercase opacity-75"
-                >
-                  {title}
-                </Typography>
-              </li>
-            )}
-            {pages.map(({ icon, name, path }) => (
-              <li key={name}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    <Button
-                      variant={isActive ? "gradient" : "text"}
-                      color={
-                        isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                      }
-                      className="flex items-center gap-4 px-4 capitalize"
-                      fullWidth
+        {routes.map(
+          ({ sidebar, layout, title, pages }, key) =>
+            sidebar && (
+              <ul key={key} className="mb-4 flex flex-col gap-1">
+                {title && (
+                  <li className="mx-3.5 mt-4 mb-2">
+                    <Typography
+                      variant="small"
+                      color={sidenavType === "dark" ? "white" : "blue-gray"}
+                      className="font-black uppercase opacity-75"
                     >
-                      {icon}
-                      <Typography
-                        color="inherit"
-                        className="font-medium capitalize"
-                      >
-                        {name}
-                      </Typography>
-                    </Button>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-            <li>
-              <Button
-                variant={"text"}
-                color={sidenavType === "dark" ? "white" : "blue-gray"}
-                className="flex items-center gap-4 px-4 capitalize"
-                fullWidth
-              >
-                <ArrowLeftIcon className="h-5 w-5 text-inherit" />
-                <Typography color="inherit" className="font-medium capitalize">
-                  Logout
-                </Typography>
-              </Button>
-            </li>
-          </ul>
-        ))}
+                      {title}
+                    </Typography>
+                  </li>
+                )}
+                {pages.map(({ icon, name, path }) => (
+                  <li key={name}>
+                    <NavLink to={`/${layout}${path}`}>
+                      {({ isActive }) => (
+                        <Button
+                          variant={isActive ? "gradient" : "text"}
+                          color={
+                            isActive
+                              ? sidenavColor
+                              : sidenavType === "dark"
+                              ? "white"
+                              : "blue-gray"
+                          }
+                          className="flex items-center gap-4 px-4 capitalize"
+                          fullWidth
+                        >
+                          {icon}
+                          <Typography
+                            color="inherit"
+                            className="font-medium capitalize"
+                          >
+                            {name}
+                          </Typography>
+                        </Button>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            )
+        )}
+        <ul className="mb-4 flex flex-col gap-1">
+          <li>
+            <Button
+              onClick={() => handleLogout()}
+              variant={"text"}
+              color={sidenavType === "dark" ? "white" : "blue-gray"}
+              className="flex items-center gap-4 px-4 capitalize"
+              fullWidth
+            >
+              <ArrowLeftIcon className="h-5 w-5 text-inherit" />
+              <Typography color="inherit" className="font-medium capitalize">
+                Logout
+              </Typography>
+            </Button>
+          </li>
+        </ul>
       </div>
     </aside>
   );

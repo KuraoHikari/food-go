@@ -15,6 +15,7 @@ import {
   Homev,
   PageShops,
 } from "@/pages/dashboard";
+import { SignIn, SignUp } from "./pages/auth";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -22,6 +23,7 @@ const icon = {
 
 export const routes = [
   {
+    sidebar: true,
     layout: "dashboard",
     pages: [
       {
@@ -62,24 +64,25 @@ export const routes = [
       },
     ],
   },
-  // {
-  //   title: "auth pages",
-  //   layout: "auth",
-  //   pages: [
-  //     {
-  //       icon: <ArrowRightOnRectangleIcon {...icon} />,
-  //       name: "sign in",
-  //       path: "/sign-in",
-  //       element: <SignIn />,
-  //     },
-  //     {
-  //       icon: <UserPlusIcon {...icon} />,
-  //       name: "sign up",
-  //       path: "/sign-up",
-  //       element: <SignUp />,
-  //     },
-  //   ],
-  // },
+  {
+    sidebar: false,
+    title: null,
+    layout: "auth",
+    pages: [
+      {
+        icon: <ArrowRightOnRectangleIcon {...icon} />,
+        name: "sign in",
+        path: "/sign-in",
+        element: <SignIn />,
+      },
+      {
+        icon: <UserPlusIcon {...icon} />,
+        name: "sign up",
+        path: "/sign-up",
+        element: <SignUp />,
+      },
+    ],
+  },
 ];
 
 export default routes;
