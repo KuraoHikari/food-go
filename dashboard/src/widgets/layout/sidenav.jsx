@@ -10,7 +10,6 @@ import {
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 import { useCallback, useState } from "react";
-import axios from "axios";
 import { logoutUser, refreshAccessToken } from "@/api/auth";
 
 export function Sidenav({ brandImg, brandName, routes }) {
@@ -43,9 +42,9 @@ export function Sidenav({ brandImg, brandName, routes }) {
       if (error.response.data.message === "Unauthorized") {
         try {
           const refreshToken = localStorage.getItem("refresh_token");
-          const newAccessToken = await refreshAccessToken(refreshToken);
+          const data = await refreshAccessToken(refreshToken);
 
-          await logoutUser(newAccessToken);
+          await logoutUser(data.access_token);
 
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");

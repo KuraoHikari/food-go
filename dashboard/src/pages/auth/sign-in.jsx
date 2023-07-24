@@ -11,7 +11,8 @@ import {
 } from "@material-tailwind/react";
 import { useForm } from "react-hook-form";
 import { useCallback, useState } from "react";
-import axios from "axios";
+
+import { loginUser, logoutUser, refreshAccessToken } from "@/api/auth";
 
 export function SignIn() {
   const navigate = useNavigate();
@@ -24,13 +25,7 @@ export function SignIn() {
     async (payload) => {
       try {
         setIsLoading(true);
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_BASE_API_URL}/auth/local/signin`,
-          {
-            email: payload.email,
-            password: payload.password,
-          }
-        );
+        const data = await loginUser(payload);
 
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);

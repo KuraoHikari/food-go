@@ -1,5 +1,43 @@
 import axios from "axios";
 
+export async function loginUser(payload) {
+  try {
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_BASE_API_URL}/auth/local/signin`,
+      {
+        email: payload.email,
+        password: payload.password,
+      }
+    );
+
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function registerUser(payload) {
+  try {
+    const { data } = await axios.post(
+      `${import.meta.env.VITE_BASE_API_URL}/auth/local/signup`,
+      {
+        email: payload.email,
+        password: payload.password,
+      }
+    );
+
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function logoutUser(accessToken) {
   try {
     await axios.post(
@@ -12,12 +50,10 @@ export async function logoutUser(accessToken) {
       }
     );
   } catch (error) {
-    console.log(error);
-    throw error; // Rethrow the error to be caught by the caller
+    throw error;
   }
 }
 
-// Function to refresh the access token
 export async function refreshAccessToken(refreshToken) {
   try {
     const { data } = await axios.post(
@@ -29,9 +65,11 @@ export async function refreshAccessToken(refreshToken) {
         },
       }
     );
-    return data.access_token;
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    };
   } catch (error) {
-    console.log("🚀 ~ handleLogout ~ error:", error);
-    throw error; // Rethrow the error to be caught by the caller
+    throw error;
   }
 }
