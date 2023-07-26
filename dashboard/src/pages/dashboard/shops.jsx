@@ -3,72 +3,41 @@ import {
   CardBody,
   CardHeader,
   CardFooter,
-  Avatar,
   Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Switch,
   Tooltip,
   Button,
-  IconButton,
   DialogHeader,
   Dialog,
   DialogFooter,
   DialogBody,
   Input,
+  Textarea,
 } from "@material-tailwind/react";
-import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  Cog6ToothIcon,
-  PencilIcon,
-  HeartIcon,
-  BanknotesIcon,
-} from "@heroicons/react/24/solid";
+import { BanknotesIcon } from "@heroicons/react/24/solid";
 import { Link, useNavigate } from "react-router-dom";
-import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
-import { platformSettingsData, conversationsData, projectsData } from "@/data";
 import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
-import { fetchShops } from "@/api/shop";
+import { createShop, fetchShops } from "@/api/shop";
 import { refreshAccessToken } from "@/api/auth";
 import { useForm } from "react-hook-form";
 
 export function PageShops() {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [createShopDialog, setCreateShopDialog] = useState(false);
 
   const handleOpen = useCallback(() => {
+    reset();
     setCreateShopDialog(!createShopDialog);
   }, [createShopDialog]);
 
   const handleCreateShop = async (payload) => {
-    const data = new FormData();
-
-    data.append("logo", payload.file[0]);
-    data.append("name", "toko nasi mantap22");
-    data.append("location", "bali");
-    data.append("desc", "jualan nasi");
-    data.append("phoneNumber", "+6283114226333");
-
     try {
-      const createShop = await axios({
-        method: "post",
-        url: "http://localhost:5000/shop",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        data: data,
-      });
-      console.log(createShop);
-    } catch (error) {
-      console.log("🚀 ~ file: shops.jsx:69 ~ handleCreateShop ~ error:", error);
-    }
+      const data = await createShop(payload);
+      setShops([data, ...shops]);
 
-    console.log(payload);
+      handleOpen();
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -94,7 +63,6 @@ export function PageShops() {
             navigate("/auth/sign-in");
           }
         } else {
-          console.log("🚀 ~ handleLogout ~ error:", error);
         }
       }
     }
@@ -108,15 +76,29 @@ export function PageShops() {
           <DialogHeader>Create Shop</DialogHeader>
           <DialogBody divider className="mb-4 flex flex-col gap-6">
             <Input
-              type="name"
+              type="text"
               label="Name"
               size="lg"
               {...register("name", { required: true })}
             />
 
-            <Input type="file" label="Name" size="lg" {...register("file")} />
-
-            <Input type="password" size="lg" label="Password" />
+            <Input type="file" label="Logo" size="lg" {...register("file")} />
+            <Input
+              type="text"
+              label="Location"
+              size="lg"
+              {...register("location", { required: true })}
+            />
+            <Input
+              type="text"
+              label="phoneNumber"
+              size="lg"
+              {...register("phoneNumber", { required: true })}
+            />
+            <Textarea
+              label="description"
+              {...register("desc", { required: true })}
+            />
           </DialogBody>
 
           <DialogFooter>
@@ -160,20 +142,19 @@ export function PageShops() {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-12 md:grid-cols-2 xl:grid-cols-4">
-              {projectsData.map(
-                ({ img, title, description, tag, route, members }) => (
-                  <Card key={title} color="transparent" shadow={false}>
-                    <CardHeader
-                      floated={false}
-                      color="gray"
-                      className="mx-0 mt-0 mb-4 h-64 xl:h-40"
-                    >
-                      <img
-                        src={img}
-                        alt={title}
-                        className="h-full w-full object-cover"
-                      />
-                      {/* <IconButton
+              {shops.map(({ id, name, desc }) => (
+                <Card key={id} color="transparent" shadow={false}>
+                  <CardHeader
+                    floated={false}
+                    color="gray"
+                    className="mx-0 mt-0 mb-4 h-64 xl:h-40"
+                  >
+                    <img
+                      src={"/img/home-decor-1.jpeg"}
+                      alt={name}
+                      className="h-full w-full object-cover"
+                    />
+                    {/* <IconButton
                         size="sm"
                         color="red"
                         variant="text"
@@ -181,43 +162,43 @@ export function PageShops() {
                       >
                         <HeartIcon className="h-6 w-6" />
                       </IconButton> */}
-                    </CardHeader>
-                    <CardBody className="py-0 px-1">
-                      <Typography
+                  </CardHeader>
+                  <CardBody className="py-0 px-1">
+                    {/* <Typography
                         variant="small"
                         className="font-normal text-blue-gray-500"
                       >
                         {tag}
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        color="blue-gray"
-                        className="mt-1 mb-2"
-                      >
-                        {title}
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="font-normal text-blue-gray-500"
-                      >
-                        {description}
-                      </Typography>
-                      <div className="group mt-8 inline-flex flex-wrap items-center gap-3">
-                        <Tooltip content="$129 per night">
-                          <span className="cursor-pointer rounded-full border border-blue-500/5 bg-blue-500/5 p-3 text-blue-500 transition-colors hover:border-blue-500/10 hover:bg-blue-500/10 hover:!opacity-100 group-hover:opacity-70">
-                            <BanknotesIcon className="h-5 w-5" />
-                          </span>
-                        </Tooltip>
-                      </div>
-                    </CardBody>
-                    <CardFooter className="mt-6 flex items-center justify-between py-0 px-1">
-                      <Link to={route}>
-                        <Button variant="outlined" size="sm">
-                          view shop
-                        </Button>
-                      </Link>
-                      <div>
-                        {/* {members.map(({ img, name }, key) => (
+                      </Typography> */}
+                    <Typography
+                      variant="h5"
+                      color="blue-gray"
+                      className="mt-1 mb-2"
+                    >
+                      {name}
+                    </Typography>
+                    <Typography
+                      variant="small"
+                      className="font-normal text-blue-gray-500"
+                    >
+                      {desc}
+                    </Typography>
+                    <div className="group mt-8 inline-flex flex-wrap items-center gap-3">
+                      <Tooltip content="$129 per night">
+                        <span className="cursor-pointer rounded-full border border-blue-500/5 bg-blue-500/5 p-3 text-blue-500 transition-colors hover:border-blue-500/10 hover:bg-blue-500/10 hover:!opacity-100 group-hover:opacity-70">
+                          <BanknotesIcon className="h-5 w-5" />
+                        </span>
+                      </Tooltip>
+                    </div>
+                  </CardBody>
+                  <CardFooter className="mt-6 flex items-center justify-between py-0 px-1">
+                    <Link to={"/"}>
+                      <Button variant="outlined" size="sm">
+                        view shop
+                      </Button>
+                    </Link>
+                    <div>
+                      {/* {members.map(({ img, name }, key) => (
                           <Tooltip key={name} content={name}>
                             <Avatar
                               src={img}
@@ -230,11 +211,10 @@ export function PageShops() {
                             />
                           </Tooltip>
                         ))} */}
-                      </div>
-                    </CardFooter>
-                  </Card>
-                )
-              )}
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           </div>
         </CardBody>
