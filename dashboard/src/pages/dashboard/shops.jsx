@@ -33,16 +33,43 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { fetchShops } from "@/api/shop";
 import { refreshAccessToken } from "@/api/auth";
+import { useForm } from "react-hook-form";
 
 export function PageShops() {
+  const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [createShopDialog, setCreateShopDialog] = useState(false);
 
   const handleOpen = useCallback(() => {
-    console.log("run");
     setCreateShopDialog(!createShopDialog);
   }, [createShopDialog]);
+
+  const handleCreateShop = async (payload) => {
+    const data = new FormData();
+
+    data.append("logo", payload.file[0]);
+    data.append("name", "toko nasi mantap22");
+    data.append("location", "bali");
+    data.append("desc", "jualan nasi");
+    data.append("phoneNumber", "+6283114226333");
+
+    try {
+      const createShop = await axios({
+        method: "post",
+        url: "http://localhost:5000/shop",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        data: data,
+      });
+      console.log(createShop);
+    } catch (error) {
+      console.log("🚀 ~ file: shops.jsx:69 ~ handleCreateShop ~ error:", error);
+    }
+
+    console.log(payload);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -50,13 +77,9 @@ export function PageShops() {
       let fetchDataShop;
       try {
         fetchDataShop = await fetchShops(accessToken);
-        console.log(
-          "🚀 ~ file: shops.jsx:53 ~ fetchData ~ fetchShops:",
-          fetchDataShop
-        );
+
         setShops(fetchDataShop);
       } catch (error) {
-        console.log("🚀 ~ file: shops.jsx:56 ~ fetchData ~ error:", error);
         if (error.response.data.message === "Unauthorized") {
           try {
             const refreshToken = localStorage.getItem("refresh_token");
@@ -81,11 +104,18 @@ export function PageShops() {
   return (
     <>
       <Dialog open={createShopDialog} size={"md"} handler={handleOpen}>
-        <form>
-          <DialogHeader>Its a simple dialog.</DialogHeader>
+        <form onSubmit={handleSubmit(handleCreateShop)}>
+          <DialogHeader>Create Shop</DialogHeader>
           <DialogBody divider className="mb-4 flex flex-col gap-6">
-            <Input size="lg" label="Name" />
-            <Input size="lg" label="Email" />
+            <Input
+              type="name"
+              label="Name"
+              size="lg"
+              {...register("name", { required: true })}
+            />
+
+            <Input type="file" label="Name" size="lg" {...register("file")} />
+
             <Input type="password" size="lg" label="Password" />
           </DialogBody>
 
@@ -98,11 +128,7 @@ export function PageShops() {
             >
               <span>Cancel</span>
             </Button>
-            <Button
-              variant="gradient"
-              color="green"
-              onClick={() => handleOpen()}
-            >
+            <Button variant="gradient" color="green" type="submit">
               <span>Confirm</span>
             </Button>
           </DialogFooter>
